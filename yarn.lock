@@ -1613,12 +1613,17 @@
   resolved "https://registry.yarnpkg.com/@blockstack/clarity/-/clarity-0.1.16.tgz#75483365bc28d25eabb6b95df4ebafa5f67954fb"
   integrity sha512-3XuPsQCz+wfSQHLVGhdfgiCVsZh2mkSZpDiV+TguoYOWtzAOZJQSoL0CdAkri0rDe5r+AM4s57lpukqgraRTaA==
 
-"@blockstack/connect-ui@2.12.1":
-  version "2.12.2-alpha.dc79a93.0"
-  resolved "https://registry.yarnpkg.com/@blockstack/connect-ui/-/connect-ui-2.12.2-alpha.dc79a93.0.tgz#7ddad79b3a91a76f137d621d40b8e50d7ad30ce4"
-  integrity sha512-Fp7pgG7UjcCDZOgDN2Chh+3IQL++ZfxVnfpbaUgs2fUaoLVgEQsAFN2c5NwkoXRLmgsoG5lcP9Cy24u4dAPqNA==
+"@blockstack/connect@2.12.1":
+  version "2.12.1"
+  resolved "https://registry.yarnpkg.com/@blockstack/connect/-/connect-2.12.1.tgz#4f91796028e3ff0954ac0c4a6bbd4557e3cff96a"
+  integrity sha512-1pOdA1hH+hAXDq+5JzlEiRtfOAAQn1ekPIzv7FDP0W65hTEGwtg9ltKikwzURrX1mFcRJSmjsjvyiIesgoNmYA==
   dependencies:
-    "@stencil/core" "^1.17.3"
+    "@blockstack/ui" "^2.12.7"
+    jsontokens "^3.0.0"
+    preact "^10.4.0"
+    styled-components "^5.1.0"
+    use-events "^1.4.1"
+    use-onclickoutside "^0.3.1"
 
 "@blockstack/eslint-config@^1.0.3", "@blockstack/eslint-config@^1.0.5":
   version "1.0.5"
