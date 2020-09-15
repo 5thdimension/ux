@@ -55,9 +55,6 @@ jobs:
           paths:
             - ./.cache/yarn
       - run:
-          name: Build UI
-          command: $HOME/.yarn/bin/yarn lerna run build --scope @blockstack/ui
-      - run:
           name: test server
           command: $HOME/.yarn/bin/yarn lerna run dev --scope @blockstack/app
           background: true
