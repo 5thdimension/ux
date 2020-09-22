@@ -19,9 +19,12 @@ import { TestnetBanner } from '@components/transactions/testnet-banner';
 import { TxError } from '@components/transactions/tx-error';
 import { TabbedCard, Tab } from '@components/tabbed-card';
 import { getRPCClient, stacksValue } from '@common/stacks-utils';
-import { Wallet } from '@blockstack/keychain';
+import { Wallet, WalletConfig } from '@blockstack/keychain';
 import { doTrack, TRANSACTION_SIGN_START, TRANSACTION_SIGN_ERROR } from '@common/track';
 import { finishTransaction, generateTransaction } from '@common/transaction-utils';
+import { gaiaUrl } from '@common/constants';
+import { GaiaHubConfig } from 'blockstack/lib/storage/hub';
+import { finalizeTxSignature } from '@common/utils';
 
 interface TabContentProps {
   json: any;
@@ -55,6 +58,9 @@ export const Transaction: React.FC = () => {
   const [contractSrc, setContractSrc] = useState('');
   const [balance, setBalance] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [gaiaConfig, setGaiaConfig] = useState<GaiaHubConfig | null>(null);
+  const [walletConfig, setWalletConfig] = useState<WalletConfig | null>(null);
+  const [chainHeight, setChainHeight] = useState<number | null>(null);
   const client = getRPCClient();
 
   if (!wallet) {
@@ -92,6 +98,38 @@ export const Transaction: React.FC = () => {
     });
     setBalance(account.balance.toNumber());
     return account;
+  };
+
+  const setupLocalNonce = async () => {
+    const gaiaConfig = await wallet.createGaiaConfig(gaiaUrl);
+    const walletConfig = await wallet.getOrCreateConfig({ gaiaConfig, skipUpload: true });
+    setGaiaConfig(gaiaConfig);
+    setWalletConfig(walletConfig);
+    return walletConfig.lastTx;
+  };
+
+  const getNonce = async (): Promise<number> => {
+    const [account, lastTx, nodeInfo] = await Promise.all([
+      setupAccountInfo(),
+      setupLocalNonce(),
+      client.fetchInfo(),
+    ]);
+    setChainHeight(nodeInfo.stacksTipHeight);
+    if (!lastTx) {
+      return account.nonce;
+    }
+    // Blocks have been mined since the last TX from this user.
+    // This is the most likely scenario.
+    if (account.nonce >= lastTx.nonce) {
+      return account.nonce;
+    }
+    // The current stacks chain has been reset since the user's last TX.
+    // In this case, use the remote nonce.
+    if (nodeInfo.stacksTipHeight < lastTx.blockHeight) {
+      return account.nonce;
+    }
+    // No blocks have been mined since the latest transaction from this user.
+    return lastTx.nonce + 1;
   };
 
   const setupWithState = async (tx: TransactionPayload) => {
@@ -132,10 +170,10 @@ export const Transaction: React.FC = () => {
       const token = decodeToken(requestToken);
       const reqState = (token.payload as unknown) as TransactionPayload;
       try {
-        const [txData, account] = await Promise.all([setupWithState(reqState), setupAccountInfo()]);
+        const [txData, nonce] = await Promise.all([setupWithState(reqState), getNonce()]);
         const tx = await generateTransaction({
           wallet,
-          nonce: account.nonce,
+          nonce: nonce,
           txData,
         });
         setSignedTransaction(tx);
@@ -164,7 +202,23 @@ export const Transaction: React.FC = () => {
     }
     setLoading(true);
     try {
-      await finishTransaction({ tx: signedTransaction, pendingTransaction });
+      const [txData] = await Promise.all([
+        finishTransaction({ tx: signedTransaction, pendingTransaction }),
+        async () => {
+          const nonce = signedTransaction.auth.spendingCondition?.nonce;
+          if (!nonce || !walletConfig || !gaiaConfig || !chainHeight) {
+            console.warn('Unable to update local account state.');
+            return;
+          }
+          walletConfig.lastTx = {
+            blockHeight: chainHeight,
+            nonce: nonce.toNumber(),
+          };
+          wallet.walletConfig = walletConfig;
+          await wallet.updateConfig(gaiaConfig);
+        },
+      ]);
+      finalizeTxSignature(txData);
     } catch (err) {
       setError(err.message);
     }
