@@ -42,7 +42,11 @@ describe.each(environments)('auth scenarios - %s %s', (browserType, deviceType) 
   let context: BrowserContext;
   let demoPage: DemoPage;
   beforeEach(async () => {
-    browser = await browserType.launch();
+    const args: string[] = [];
+    if (browserType.name() === 'chromium') {
+      args.push('--no-sandbox');
+    }
+    browser = await browserType.launch({ args });
     console.log('[DEBUG]: Launched puppeteer browser');
     if (deviceType) {
       context = await browser.newContext({
