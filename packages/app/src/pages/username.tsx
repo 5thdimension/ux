@@ -145,17 +145,17 @@ export const Username: React.FC<{}> = () => {
             </Text>
             <Box textAlign="left" position="relative" mt={4}>
               <Input
-                autoComplete="off"
                 data-test="input-username"
-                autoCapitalize="false"
                 paddingRight="100px"
                 autoFocus
                 fontSize="16px"
-                spellCheck={false}
                 value={username}
                 aria-invalid={error !== null}
                 onChange={handleInput}
                 autoCorrect="off"
+                autoComplete="off"
+                autoCapitalize="off"
+                spellCheck="false"
               />
             </Box>
             {error && hasAttemptedSubmit && (
