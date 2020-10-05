@@ -44,7 +44,7 @@ export class Modal {
             {state.screen === Screens.INTRO && (
               <Intro authOptions={this.authOptions} signUp={this.onSignUp} signIn={this.onSignIn} />
             )}
-            {state.screen === Screens.HOW_IT_WORKS && <HowItWorks />}
+            {state.screen === Screens.HOW_IT_WORKS && <HowItWorks signUp={this.onSignUp} />}
           </div>
         </div>
       </div>

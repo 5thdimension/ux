@@ -1,7 +1,11 @@
-import { h } from '@stencil/core';
+import { h, EventEmitter } from '@stencil/core';
 import { MiniBlockstackIcon } from '../assets/mini-blockstack-icon';
 
-export const HowItWorks = () => {
+interface HowItWorksProps {
+  signUp: EventEmitter;
+}
+
+export const HowItWorks = ({ signUp }: HowItWorksProps) => {
   return (
     <div>
       <div class="how-it-works">
@@ -48,7 +52,7 @@ export const HowItWorks = () => {
         </span>
       </div>
       <div class="button-container">
-        <button class="button">
+        <button class="button" onClick={() => signUp.emit()}>
           <span>Get your Secret Key</span>
         </button>
       </div>
