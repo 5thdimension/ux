@@ -5,7 +5,7 @@ import { state, Screens } from '../../../store';
 import { LinkIcon } from '../assets/link-icon';
 import { PadlockBox } from '../assets/padlock-box';
 import { AuthOptions } from '@blockstack/connect/auth';
-import { onClick as onExtensionClick } from '../extension-util';
+import { onClick as onExtensionClick, getBrowser } from '../extension-util';
 
 interface IntroProps {
   authOptions: AuthOptions;
@@ -65,9 +65,11 @@ export const Intro = ({ authOptions, signUp, signIn }: IntroProps) => {
         <span class="link" onClick={() => (state.screen = Screens.HOW_IT_WORKS)}>
           How it works
         </span>
-        <span class="link" onClick={onExtensionClick}>
-          Install extension
-        </span>
+        {getBrowser() ? (
+          <span class="link" onClick={onExtensionClick}>
+            Install extension
+          </span>
+        ) : null}
       </div>
     </div>
   );
